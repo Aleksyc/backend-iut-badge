@@ -11,7 +11,7 @@ async def service_get_all_etudiants():
 async def service_get_all_presences():
     pool = await create_pool()
     async with pool.acquire() as connection:
-        result = await connection.fetch("SELECT * FROM presences;")
+        result = await connection.fetch("SELECT * FROM presence;")
     await pool.close()
     return [Presence(**item) for item in result]
 
@@ -34,7 +34,7 @@ async def service_insert_presence(presence: Presence):
     pool = await create_pool()
     async with pool.acquire() as connection:
         await connection.execute(
-            "INSERT INTO presences (id_carte_etu, datetime_pres, type_pres) VALUES ($1, $2, $3);",
+            "INSERT INTO presence (id_carte_etu, datetime_pres, type_pres) VALUES ($1, $2, $3);",
             presence.id_carte_etu,
             presence.datetime_pres,
             presence.type_pres,
