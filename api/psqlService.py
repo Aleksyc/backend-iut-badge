@@ -8,6 +8,13 @@ async def service_get_all_etudiants():
     await pool.close()
     return [Etudiant(**item) for item in result]
 
+async def service_get_count_etudiants():
+    pool = await create_pool()
+    async with pool.acquire() as connection:
+        result = await connection.fetch("SELECT COUNT(*) FROM etudiant;")
+    await pool.close()
+    return result[0]["count"]
+
 async def service_get_all_presences():
     pool = await create_pool()
     async with pool.acquire() as connection:
