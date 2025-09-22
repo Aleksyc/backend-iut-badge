@@ -1,6 +1,8 @@
 from psqlConfig import create_pool
 from psqlModel import Etudiant, Presence
 
+# ------- service Etudiant -------
+
 async def service_get_all_etudiants():
     pool = await create_pool()
     async with pool.acquire() as connection:
@@ -15,12 +17,12 @@ async def service_get_count_etudiants():
     await pool.close()
     return result[0]["count"]
 
-async def service_get_all_presences():
+async def service_get_count_etudiants_actifs():
     pool = await create_pool()
     async with pool.acquire() as connection:
-        result = await connection.fetch("SELECT * FROM presence;")
+        result = await connection.fetch("SELECT COUNT(DISTINCT id_carte_etu) AS nb_etudiants_actifs FROM presence WHERE datetime_pres::date = CURRENT_DATE;")
     await pool.close()
-    return [Presence(**item) for item in result]
+    return result[0]["nb_etudiants_actifs"]
 
 async def service_insert_etudiant(etudiant: Etudiant):
     pool = await create_pool()
@@ -36,6 +38,32 @@ async def service_insert_etudiant(etudiant: Etudiant):
         )
     await pool.close()
     return etudiant
+
+# ------- service Presence -------
+
+async def service_get_count_day():
+    pool = await create_pool()
+    async with pool.acquire() as connection:
+        result = await connection.fetch("SELECT COUNT(*) AS nb_badges FROM presence WHERE datetime_pres::date = CURRENT_DATE;")
+    await pool.close()
+    return result[0]["nb_badges"]
+
+async def service_get_count_week():
+    pool = await create_pool()
+    async with pool.acquire() as connection:
+        result = await connection.fetch("SELECT COUNT(*) AS nb_badges FROM presence " \
+        "WHERE datetime_pres >= date_trunc('week', CURRENT_DATE) " \
+        "AND datetime_pres < date_trunc('week', CURRENT_DATE) + interval '1 week';")
+    await pool.close()
+    return result[0]["nb_badges"]
+
+
+async def service_get_all_presences():
+    pool = await create_pool()
+    async with pool.acquire() as connection:
+        result = await connection.fetch("SELECT * FROM presence;")
+    await pool.close()
+    return [Presence(**item) for item in result]
 
 async def service_insert_presence(presence: Presence):
     pool = await create_pool()

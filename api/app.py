@@ -1,4 +1,4 @@
-from psqlService import service_get_all_etudiants, service_get_count_etudiants, service_get_all_presences, service_insert_etudiant, service_insert_presence
+from psqlService import service_get_all_etudiants, service_get_count_etudiants, service_get_count_etudiants_actifs, service_get_count_day, service_get_count_week, service_get_all_presences, service_insert_etudiant, service_insert_presence
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from psqlModel import Etudiant, Presence
@@ -18,13 +18,13 @@ app.add_middleware(
 def home_root():
     return {"message": "Home page"}
 
-# Ping endpoint
+# ------- Ping endpoint -------
 
 @app.get("/ping")
 def ping():
     return {"message": "pong"}
 
-# Etudiant endpoints
+# ------- Etudiant endpoints -------
 
 @app.get("/db/etudiants", response_model=list[Etudiant])
 async def get_all_etudiants():
@@ -39,6 +39,13 @@ async def get_count_etudiants():
         return {"count-etudiants": await service_get_count_etudiants()}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/db/count-etudiants-actifs", response_model=dict)
+async def get_count_etudiants_actifs():
+    try:
+        return {"count-etudiants-actifs": await service_get_count_etudiants_actifs()}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
     
 @app.post("/db/insert-etudiant", response_model=Etudiant)
 async def insert_etudiant(etudiant: Etudiant):
@@ -47,7 +54,7 @@ async def insert_etudiant(etudiant: Etudiant):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-# Presence endpoints
+# ------- Presence endpoints -------
 
 @app.get("/db/presences", response_model=list[Presence])
 async def get_all_presences():
@@ -60,5 +67,19 @@ async def get_all_presences():
 async def insert_presence(presence: Presence):
     try:
         return await service_insert_presence(presence)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    
+@app.get("/db/count-day", response_model=dict)
+async def get_count_day():
+    try:
+        return {"count-day": await service_get_count_day()}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    
+@app.get("/db/count-week", response_model=dict)
+async def get_count_week():
+    try:
+        return {"count-week": await service_get_count_week()}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
