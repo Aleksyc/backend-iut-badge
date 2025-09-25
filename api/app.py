@@ -1,8 +1,7 @@
-from psqlService import service_get_all_etudiants, service_get_count_etudiants, service_get_count_etudiants_actifs, service_get_count_day, service_get_count_week, service_get_all_presences, service_insert_etudiant, service_insert_presence
+from psqlService import *
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from psqlModel import Etudiant, Presence
-
 
 app = FastAPI()
 
@@ -18,13 +17,13 @@ app.add_middleware(
 def home_root():
     return {"message": "Home page"}
 
-# ------- Ping endpoint -------
+# =================== Ping endpoint ===================
 
 @app.get("/ping")
 def ping():
     return {"message": "pong"}
 
-# ------- Etudiant endpoints -------
+# =================== Etudiant endpoints ===================
 
 @app.get("/db/etudiants", response_model=list[Etudiant])
 async def get_all_etudiants():
@@ -46,15 +45,15 @@ async def get_count_etudiants_actifs():
         return {"count-etudiants-actifs": await service_get_count_etudiants_actifs()}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-    
-@app.post("/db/insert-etudiant", response_model=Etudiant)
-async def insert_etudiant(etudiant: Etudiant):
+
+@app.delete("/db/etudiants/{id_etu}", response_model=dict)
+async def delete_etudiant(id_etu: int):
     try:
-        return await service_insert_etudiant(etudiant)
+        return await service_delete_etudiant(id_etu)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-# ------- Presence endpoints -------
+# =================== Presence endpoints ===================
 
 @app.get("/db/presences", response_model=list[Presence])
 async def get_all_presences():

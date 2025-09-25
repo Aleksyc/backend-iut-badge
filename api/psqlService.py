@@ -24,20 +24,12 @@ async def service_get_count_etudiants_actifs():
     await pool.close()
     return result[0]["nb_etudiants_actifs"]
 
-async def service_insert_etudiant(etudiant: Etudiant):
+async def service_delete_etudiant(id_etu: int):
     pool = await create_pool()
     async with pool.acquire() as connection:
-        await connection.execute(
-            "INSERT INTO etudiant (nom_etu, prenom_etu, anne_etu, td_etu, tp_etu, id_carte_etu) VALUES ($1, $2, $3, $4, $5, $6);",
-            etudiant.nom_etu,
-            etudiant.prenom_etu,
-            etudiant.anne_etu,
-            etudiant.td_etu,
-            etudiant.tp_etu,
-            etudiant.id_carte_etu,
-        )
+        result = await connection.execute("DELETE FROM etudiant WHERE id_etu = $1;", id_etu)
     await pool.close()
-    return etudiant
+    return {"message": f"Étudiant avec l'id {id_etu} supprimé."}
 
 # ------- service Presence -------
 
