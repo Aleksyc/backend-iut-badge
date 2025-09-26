@@ -16,3 +16,12 @@ class Presence(BaseModel):
     id_carte_etu: int
     datetime_pres: datetime
     type_pres: (str|None) = None
+
+class EtudPres(BaseModel):
+    id_etu: int
+    nom_etu: str
+    prenom_etu: str
+    anne_etu: str
+    td_etu: (str|None) = None
+    tp_etu: (str|None) = None
+    datetime_pres: datetime

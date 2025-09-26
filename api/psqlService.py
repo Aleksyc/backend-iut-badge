@@ -1,5 +1,5 @@
 from psqlConfig import create_pool
-from psqlModel import Etudiant, Presence
+from psqlModel import Etudiant, Presence, EtudPres
 
 # ------- service Etudiant -------
 
@@ -23,6 +23,13 @@ async def service_get_count_etudiants_actifs():
         result = await connection.fetch("SELECT COUNT(DISTINCT id_carte_etu) AS nb_etudiants_actifs FROM presence WHERE datetime_pres::date = CURRENT_DATE;")
     await pool.close()
     return result[0]["nb_etudiants_actifs"]
+
+async def service_get_etudiants_presences():
+    pool = await create_pool()
+    async with pool.acquire() as connection:
+        result = await connection.fetch("SELECT id_etu, nom_etu, prenom_etu, anne_etu, td_etu, tp_etu, datetime_pres FROM etudiant INNER JOIN presence ON etudiant.id_carte_etu = presence.id_carte_etu;")
+    await pool.close()
+    return [EtudPres(**item) for item in result]
 
 async def service_delete_etudiant(id_etu: int):
     pool = await create_pool()

@@ -1,7 +1,7 @@
 from psqlService import *
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from psqlModel import Etudiant, Presence
+from psqlModel import Etudiant, Presence, EtudPres
 
 app = FastAPI()
 
@@ -43,6 +43,13 @@ async def get_count_etudiants():
 async def get_count_etudiants_actifs():
     try:
         return {"count-etudiants-actifs": await service_get_count_etudiants_actifs()}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    
+@app.get("/db/etudiants-presences", response_model=list[EtudPres])
+async def get_etudiants_presences():
+    try:
+        return await service_get_etudiants_presences()
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
