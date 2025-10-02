@@ -50,12 +50,9 @@ async def service_get_count_day():
 async def service_get_count_week():
     pool = await create_pool()
     async with pool.acquire() as connection:
-        result = await connection.fetch("SELECT COUNT(*) AS nb_badges FROM presence " \
-        "WHERE datetime_pres >= date_trunc('week', CURRENT_DATE) " \
-        "AND datetime_pres < date_trunc('week', CURRENT_DATE) + interval '1 week';")
+        result = await connection.fetch("SELECT COUNT(*) AS nb_badges FROM presence WHERE datetime_pres >= date_trunc('week', CURRENT_DATE) AND datetime_pres < date_trunc('week', CURRENT_DATE) + interval '1 week';")
     await pool.close()
     return result[0]["nb_badges"]
-
 
 async def service_get_all_presences():
     pool = await create_pool()
