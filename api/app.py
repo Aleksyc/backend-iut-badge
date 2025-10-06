@@ -34,7 +34,7 @@ async def get_all_etudiants():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/db/search-etudiants", response_model=list[Etudiant])
+@app.post("/db/search-etudiants", response_model=list[EtudPres])
 async def search_etudiants(params: Dict[str, Any] | None = Body(...)):
     try:
         return await service_search_etudiants(params)
