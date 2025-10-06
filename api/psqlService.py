@@ -10,6 +10,23 @@ async def service_get_all_etudiants():
     await pool.close()
     return [Etudiant(**item) for item in result]
 
+async def service_search_etudiants(params: dict):
+    pool = await create_pool()
+    async with pool.acquire() as connection:
+        query = "SELECT id_etu, nom_etu, prenom_etu, anne_etu, td_etu, tp_etu, datetime_pres FROM etudiant INNER JOIN presence ON etudiant.id_carte_etu = presence.id_carte_etu"
+        values = []
+        if params:
+            for i, (key, value) in enumerate(params.items(), start=1):
+                if value != "":
+                    if i == 1: query += f" WHERE {key} = ${i}"
+                    if key == "datetime_pres_start": query += f" AND datetime_pres >= ${i}"
+                    if key == "datetime_pres_end": query += f" AND datetime_pres <= ${i}"
+                    else: query += f" AND {key} = ${i}"
+                    values.append(value)
+        result = await connection.fetch(query, *values)
+    await pool.close()
+    return [EtudPres(**item) for item in result]
+
 async def service_get_count_etudiants():
     pool = await create_pool()
     async with pool.acquire() as connection:

@@ -2,6 +2,8 @@ from psqlService import *
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from psqlModel import Etudiant, Presence, EtudPres
+from typing import Dict, Any
+from fastapi import Body
 
 app = FastAPI()
 
@@ -29,6 +31,13 @@ def ping():
 async def get_all_etudiants():
     try:
         return await service_get_all_etudiants()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/db/search-etudiants", response_model=list[Etudiant])
+async def search_etudiants(params: Dict[str, Any] | None = Body(...)):
+    try:
+        return await service_search_etudiants(params)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
