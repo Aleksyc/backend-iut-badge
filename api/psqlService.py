@@ -16,14 +16,16 @@ async def service_search_etudiants(params: dict):
     async with pool.acquire() as connection:
         query = "SELECT id_etu, nom_etu, prenom_etu, anne_etu, td_etu, tp_etu, datetime_pres FROM etudiant INNER JOIN presence ON etudiant.id_carte_etu = presence.id_carte_etu"
         values = []
+        i = 1
         if params:
-            for i, (key, value) in enumerate(params.items(), start=1):
+            for key, value in params.items():
                 if value != "":
                     if i == 1 and key != "datetime_pres_start" and key != "datetime_pres_end": query += f" WHERE {key} = ${i}"
                     elif key == "datetime_pres_start": value = datetime.datetime.strptime(value, "%Y-%m-%d").date(); query += f" AND datetime_pres::date >= ${i}::date"
                     elif key == "datetime_pres_end": value = datetime.datetime.strptime(value, "%Y-%m-%d").date(); query += f" AND datetime_pres::date <= ${i}::date"
                     else: query += f" AND {key} = ${i}"
                     values.append(value)
+                    i += 1
         result = await connection.fetch(query, *values)
     await pool.close()
     return [EtudPres(**item) for item in result]
