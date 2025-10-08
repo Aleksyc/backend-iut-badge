@@ -19,10 +19,9 @@ async def service_search_etudiants(params: dict):
         if params:
             for i, (key, value) in enumerate(params.items(), start=1):
                 if value != "":
-                    if isinstance(value, str): value = datetime.datetime.strptime(value, "%Y-%m-%d").date()
                     if i == 1 and key != "datetime_pres_start" and key != "datetime_pres_end": query += f" WHERE {key} = ${i}"
-                    elif key == "datetime_pres_start": query += f" AND datetime_pres::date >= ${i}"
-                    elif key == "datetime_pres_end": query += f" AND datetime_pres::date <= ${i}"
+                    elif key == "datetime_pres_start": value = datetime.datetime.strptime(value, "%Y-%m-%d").date(); query += f" AND datetime_pres::date >= ${i}"
+                    elif key == "datetime_pres_end": value = datetime.datetime.strptime(value, "%Y-%m-%d").date(); query += f" AND datetime_pres::date <= ${i}"
                     else: query += f" AND {key} = ${i}"
                     values.append(value)
         result = await connection.fetch(query, *values)
