@@ -25,3 +25,4 @@ class EtudPres(BaseModel):
     td_etu: (str|None) = None
     tp_etu: (str|None) = None
     datetime_pres: datetime
+    statut_presence: str
