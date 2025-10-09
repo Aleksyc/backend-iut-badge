@@ -24,5 +24,5 @@ class EtudPres(BaseModel):
     anne_etu: str
     td_etu: (str|None) = None
     tp_etu: (str|None) = None
-    datetime_pres: datetime
+    datetime_pres: (datetime|None) = None
     statut_presence: str

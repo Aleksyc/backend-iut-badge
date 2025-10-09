@@ -21,7 +21,7 @@ async def service_search_etudiants(params: dict):
             values = []
             i = 1
             for key, value in params.items():
-                if key != "datetime_pres_start" and key != "datetime_pres_end":
+                if key != "datetime_pres_start" and key != "datetime_pres_end" and value != "":
                     if i == 1 : query += f" WHERE {key} = ${i}"
                     else: query += f" AND {key} = ${i}"
                     values.append(value)
