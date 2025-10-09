@@ -26,7 +26,7 @@ async def service_search_etudiants(params: dict):
                     else: query += f" AND {key} = ${i}"
                     values.append(value)
                     i += 1
-            query += "ORDER BY d.jour;"
+            query += " ORDER BY d.jour;"
         result = await connection.fetch(query, *values)
     await pool.close()
     return [EtudPres(**item) for item in result]
