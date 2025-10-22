@@ -5,6 +5,10 @@ import datetime
 # =================== Service Etudiant ===================
 
 async def service_get_all_etudiants():
+    """
+    Récupère tous les étudiants de la base de données.
+    return: Liste d'objets Etudiant.
+    """
     pool = await create_pool()
     async with pool.acquire() as connection:
         result = await connection.fetch("SELECT * FROM etudiant;")
@@ -12,6 +16,11 @@ async def service_get_all_etudiants():
     return [Etudiant(**item) for item in result]
 
 async def service_search_etudiants(params: dict):
+    """
+    Recherche les étudiants selon des paramètres (dates, nom, groupe, etc).
+    param params: Dictionnaire des filtres de recherche.
+    return: Liste d'objets EtudPres correspondant aux critères.
+    """
     pool = await create_pool()
     async with pool.acquire() as connection:
         if params and params["datetime_pres_start"] != "" and params["datetime_pres_end"] != "":
@@ -32,6 +41,11 @@ async def service_search_etudiants(params: dict):
     return [EtudPres(**item) for item in result]
 
 async def service_insert_etudiant(etudiant: EtudiantCreate):
+    """
+    Insère un nouvel étudiant dans la base de données.
+    param etudiant: Données de l'étudiant à insérer.
+    return: L'objet Etudiant inséré.
+    """
     pool = await create_pool()
     async with pool.acquire() as connection:
         row = await connection.fetchrow(
@@ -48,6 +62,12 @@ async def service_insert_etudiant(etudiant: EtudiantCreate):
     return Etudiant(**row)
 
 async def service_update_etudiant(id_etu: int, etudiant: EtudiantCreate):
+    """
+    Met à jour les informations d'un étudiant existant.
+    param id_etu: ID de l'étudiant à modifier.
+    param etudiant: Nouvelles données de l'étudiant.
+    return: L'objet Etudiant mis à jour.
+    """
     pool = await create_pool()
     async with pool.acquire() as connection:
         row = await connection.fetchrow(
@@ -65,6 +85,10 @@ async def service_update_etudiant(id_etu: int, etudiant: EtudiantCreate):
     return Etudiant(**row)
 
 async def service_get_count_etudiants():
+    """
+    Retourne le nombre total d'étudiants dans la base.
+    return: Entier du nombre d'étudiants.
+    """
     pool = await create_pool()
     async with pool.acquire() as connection:
         result = await connection.fetch("SELECT COUNT(*) FROM etudiant;")
@@ -72,6 +96,10 @@ async def service_get_count_etudiants():
     return result[0]["count"]
 
 async def service_get_count_etudiants_actifs():
+    """
+    Retourne le nombre d'étudiants actifs aujourd'hui (ayant badgé).
+    return: Entier du nombre d'étudiants actifs.
+    """
     pool = await create_pool()
     async with pool.acquire() as connection:
         result = await connection.fetch("SELECT COUNT(DISTINCT id_carte_etu) AS nb_etudiants_actifs FROM presence WHERE datetime_pres::date = CURRENT_DATE;")
@@ -79,6 +107,10 @@ async def service_get_count_etudiants_actifs():
     return result[0]["nb_etudiants_actifs"]
 
 async def service_get_etudiants_presences():
+    """
+    Récupère les présences associées à chaque étudiant.
+    return: Liste d'objets EtudPres (étudiant + présence).
+    """
     pool = await create_pool()
     async with pool.acquire() as connection:
         result = await connection.fetch("SELECT id_etu, nom_etu, prenom_etu, anne_etu, td_etu, tp_etu, datetime_pres FROM etudiant INNER JOIN presence ON etudiant.id_carte_etu = presence.id_carte_etu;")
@@ -86,6 +118,11 @@ async def service_get_etudiants_presences():
     return [EtudPres(**item) for item in result]
 
 async def service_delete_etudiant(id_etu: int):
+    """
+    Supprime un étudiant selon son ID.
+    param id_etu: ID de l'étudiant à supprimer.
+    return: Message de confirmation.
+    """
     pool = await create_pool()
     async with pool.acquire() as connection:
         result = await connection.execute("DELETE FROM etudiant WHERE id_etu = $1;", id_etu)
@@ -95,6 +132,10 @@ async def service_delete_etudiant(id_etu: int):
 # =================== Service Presence ===================
 
 async def service_get_count_day():
+    """
+    Retourne le nombre de badges (présences) du jour.
+    return: Entier du nombre de badges aujourd'hui.
+    """
     pool = await create_pool()
     async with pool.acquire() as connection:
         result = await connection.fetch("SELECT COUNT(*) AS nb_badges FROM presence WHERE datetime_pres::date = CURRENT_DATE;")
@@ -102,6 +143,10 @@ async def service_get_count_day():
     return result[0]["nb_badges"]
 
 async def service_get_count_week():
+    """
+    Retourne le nombre de badges (présences) de la semaine courante.
+    return: Entier du nombre de badges cette semaine.
+    """
     pool = await create_pool()
     async with pool.acquire() as connection:
         result = await connection.fetch("SELECT COUNT(*) AS nb_badges FROM presence WHERE datetime_pres >= date_trunc('week', CURRENT_DATE) AND datetime_pres < date_trunc('week', CURRENT_DATE) + interval '1 week';")
@@ -109,6 +154,10 @@ async def service_get_count_week():
     return result[0]["nb_badges"]
 
 async def service_get_all_presences():
+    """
+    Récupère toutes les présences enregistrées.
+    return: Liste d'objets Presence.
+    """
     pool = await create_pool()
     async with pool.acquire() as connection:
         result = await connection.fetch("SELECT * FROM presence;")
@@ -116,6 +165,11 @@ async def service_get_all_presences():
     return [Presence(**item) for item in result]
 
 async def service_insert_presence(presence: Presence):
+    """
+    Insère une nouvelle présence dans la base de données.
+    param presence: Données de la présence à insérer.
+    return: L'objet Presence inséré.
+    """
     pool = await create_pool()
     async with pool.acquire() as connection:
         await connection.execute(
