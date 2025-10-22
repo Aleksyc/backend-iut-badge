@@ -1,8 +1,8 @@
 from psqlConfig import create_pool
-from psqlModel import Etudiant, Presence, EtudPres
+from psqlModel import Etudiant, EtudiantCreate, Presence, EtudPres
 import datetime
 
-# ------- service Etudiant -------
+# =================== Service Etudiant ===================
 
 async def service_get_all_etudiants():
     pool = await create_pool()
@@ -30,6 +30,39 @@ async def service_search_etudiants(params: dict):
         result = await connection.fetch(query, *values)
     await pool.close()
     return [EtudPres(**item) for item in result]
+
+async def service_insert_etudiant(etudiant: EtudiantCreate):
+    pool = await create_pool()
+    async with pool.acquire() as connection:
+        row = await connection.fetchrow(
+            "INSERT INTO etudiant (nom_etu, prenom_etu, anne_etu, td_etu, tp_etu, id_carte_etu) "
+            "VALUES ($1, $2, $3, $4, $5, $6) RETURNING id_etu, nom_etu, prenom_etu, anne_etu, td_etu, tp_etu, id_carte_etu;",
+            etudiant.nom_etu,
+            etudiant.prenom_etu,
+            etudiant.anne_etu,
+            etudiant.td_etu,
+            etudiant.tp_etu,
+            etudiant.id_carte_etu,
+        )
+    await pool.close()
+    return Etudiant(**row)
+
+async def service_update_etudiant(id_etu: int, etudiant: EtudiantCreate):
+    pool = await create_pool()
+    async with pool.acquire() as connection:
+        row = await connection.fetchrow(
+            "UPDATE etudiant SET nom_etu = $1, prenom_etu = $2, anne_etu = $3, td_etu = $4, tp_etu = $5, id_carte_etu = $6 "
+            "WHERE id_etu = $7 RETURNING id_etu, nom_etu, prenom_etu, anne_etu, td_etu, tp_etu, id_carte_etu;",
+            etudiant.nom_etu,
+            etudiant.prenom_etu,
+            etudiant.anne_etu,
+            etudiant.td_etu,
+            etudiant.tp_etu,
+            etudiant.id_carte_etu,
+            id_etu,
+        )
+    await pool.close()
+    return Etudiant(**row)
 
 async def service_get_count_etudiants():
     pool = await create_pool()
@@ -59,7 +92,7 @@ async def service_delete_etudiant(id_etu: int):
     await pool.close()
     return {"message": f"Étudiant avec l'id {id_etu} supprimé."}
 
-# ------- service Presence -------
+# =================== Service Presence ===================
 
 async def service_get_count_day():
     pool = await create_pool()

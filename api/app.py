@@ -1,7 +1,7 @@
 from psqlService import *
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from psqlModel import Etudiant, Presence, EtudPres
+from psqlModel import Etudiant, EtudiantCreate, Presence, EtudPres
 from typing import Dict, Any
 from fastapi import Body
 
@@ -11,9 +11,11 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "DELETE", "PUT"],
     allow_headers=["*"],
 )
+
+# =================== Home endpoint ===================
 
 @app.get("/")
 def home_root():
@@ -27,10 +29,31 @@ def ping():
 
 # =================== Etudiant endpoints ===================
 
+@app.post("/db/etudiants", response_model=Etudiant)
+async def insert_etudiant(etudiant: EtudiantCreate):
+    try:
+        return await service_insert_etudiant(etudiant)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 @app.get("/db/etudiants", response_model=list[Etudiant])
 async def get_all_etudiants():
     try:
         return await service_get_all_etudiants()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.put("/db/etudiants/{id_etu}", response_model=Etudiant)
+async def update_etudiant(id_etu: int, etudiant: EtudiantCreate):
+    try:
+        return await service_update_etudiant(id_etu, etudiant)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    
+@app.delete("/db/etudiants/{id_etu}", response_model=dict)
+async def delete_etudiant(id_etu: int):
+    try:
+        return await service_delete_etudiant(id_etu)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -59,13 +82,6 @@ async def get_count_etudiants_actifs():
 async def get_etudiants_presences():
     try:
         return await service_get_etudiants_presences()
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-@app.delete("/db/etudiants/{id_etu}", response_model=dict)
-async def delete_etudiant(id_etu: int):
-    try:
-        return await service_delete_etudiant(id_etu)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
