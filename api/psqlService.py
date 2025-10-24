@@ -129,6 +129,18 @@ async def service_delete_etudiant(id_etu: int):
     await pool.close()
     return {"message": f"Étudiant avec l'id {id_etu} supprimé."}
 
+async def service_get_etudiant_by_id(id_etu: int):
+    """
+    Récupère un étudiant selon son ID.
+    param id_etu: ID de l'étudiant à récupérer.
+    return: Objet Etudiant correspondant.
+    """
+    pool = await create_pool()
+    async with pool.acquire() as connection:
+        row = await connection.fetchrow("SELECT * FROM etudiant WHERE id_etu = $1;", id_etu)
+    await pool.close()
+    return Etudiant(**row)
+
 # =================== Service Presence ===================
 
 async def service_get_count_day():
@@ -141,6 +153,18 @@ async def service_get_count_day():
         result = await connection.fetch("SELECT COUNT(*) AS nb_badges FROM presence WHERE datetime_pres::date = CURRENT_DATE;")
     await pool.close()
     return result[0]["nb_badges"]
+
+async def service_get_presence_by_id(id_etu: int):
+    """
+    Récupère une présence selon l'ID d'un étudiant.
+    param id_etu: ID de l'étudiant à récupérer.
+    return: Objet Presence correspondant.
+    """
+    pool = await create_pool()
+    async with pool.acquire() as connection:
+        row = await connection.fetch("SELECT id_pres, presence.id_carte_etu, datetime_pres, type_pres FROM presence INNER JOIN etudiant ON presence.id_carte_etu = etudiant.id_carte_etu WHERE etudiant.id_etu = $1;", id_etu)
+    await pool.close()
+    return [Presence(**item) for item in row]
 
 async def service_get_count_week():
     """

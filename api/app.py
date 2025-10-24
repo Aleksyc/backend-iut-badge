@@ -19,7 +19,7 @@ app.add_middleware(
 
 # =================== Home endpoint ===================
 
-@app.get("/")
+@app.get("/", tags=["Home"])
 def home_root():
     """
     Endpoint racine de l'API.
@@ -29,7 +29,7 @@ def home_root():
 
 # =================== Ping endpoint ===================
 
-@app.get("/ping")
+@app.get("/ping", tags=["Home"])
 def ping():
     """
     Vérification de la disponibilité de l'API.
@@ -37,9 +37,9 @@ def ping():
     """
     return {"message": "pong"}
 
-# =================== Etudiant endpoints ===================
+# ================ Etudiant endpoints =================
 
-@app.post("/db/etudiants", response_model=Etudiant)
+@app.post("/db/etudiants", response_model=Etudiant, tags=["Etudiant"])
 async def insert_etudiant(etudiant: EtudiantCreate):
     """
     Insertion d'un nouvel étudiant dans la base de données.
@@ -51,7 +51,7 @@ async def insert_etudiant(etudiant: EtudiantCreate):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/db/etudiants", response_model=list[Etudiant])
+@app.get("/db/etudiants", response_model=list[Etudiant], tags=["Etudiant"])
 async def get_all_etudiants():
     """
     Récupère tous les étudiants présents dans la base de données.
@@ -62,7 +62,7 @@ async def get_all_etudiants():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.put("/db/etudiants/{id_etu}", response_model=Etudiant)
+@app.put("/db/etudiants/{id_etu}", response_model=Etudiant, tags=["Etudiant"])
 async def update_etudiant(id_etu: int, etudiant: EtudiantCreate):
     """
     Met à jour les informations d'un étudiant existant.
@@ -75,7 +75,7 @@ async def update_etudiant(id_etu: int, etudiant: EtudiantCreate):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
     
-@app.delete("/db/etudiants/{id_etu}", response_model=dict)
+@app.delete("/db/etudiants/{id_etu}", response_model=dict, tags=["Etudiant"])
 async def delete_etudiant(id_etu: int):
     """
     Supprime un étudiant selon son ID.
@@ -87,7 +87,19 @@ async def delete_etudiant(id_etu: int):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/db/search-etudiants", response_model=list[EtudPres])
+@app.get("/db/etudiants/{id_etu}", response_model=Etudiant, tags=["Etudiant"])
+async def get_etudiant_by_id(id_etu: int):
+    """
+    Récupère un étudiant selon son ID.
+    param id_etu: ID de l'étudiant à récupérer.
+    return: Objet Etudiant correspondant.
+    """
+    try:
+        return await service_get_etudiant_by_id(id_etu)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/db/search-etudiants", response_model=list[EtudPres], tags=["Etudiant"])
 async def search_etudiants(params: Dict[str, Any] | None = Body(...)):
     """
     Recherche des étudiants selon des paramètres (dates, nom, groupe, etc).
@@ -99,7 +111,7 @@ async def search_etudiants(params: Dict[str, Any] | None = Body(...)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/db/count-etudiants", response_model=dict)
+@app.get("/db/count-etudiants", response_model=dict, tags=["Etudiant"])
 async def get_count_etudiants():
     """
     Retourne le nombre total d'étudiants dans la base.
@@ -110,7 +122,7 @@ async def get_count_etudiants():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/db/count-etudiants-actifs", response_model=dict)
+@app.get("/db/count-etudiants-actifs", response_model=dict, tags=["Etudiant"])
 async def get_count_etudiants_actifs():
     """
     Retourne le nombre d'étudiants actifs aujourd'hui (ayant badgé).
@@ -121,7 +133,7 @@ async def get_count_etudiants_actifs():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
     
-@app.get("/db/etudiants-presences", response_model=list[EtudPres])
+@app.get("/db/etudiants-presences", response_model=list[EtudPres], tags=["Etudiant"])
 async def get_etudiants_presences():
     """
     Récupère les présences associées à chaque étudiant.
@@ -134,7 +146,7 @@ async def get_etudiants_presences():
 
 # =================== Presence endpoints ===================
 
-@app.get("/db/presences", response_model=list[Presence])
+@app.get("/db/presences", response_model=list[Presence], tags=["Presence"])
 async def get_all_presences():
     """
     Récupère toutes les présences enregistrées.
@@ -145,7 +157,19 @@ async def get_all_presences():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/db/insert-presence", response_model=Presence)
+@app.get("/db/presences/{id_etu}", response_model=list[Presence] | None, tags=["Presence"])
+async def get_presence_by_id(id_etu: int):
+    """
+    Récupère une présence selon l'ID d'un étudiant.
+    param id_etu: ID de l'étudiant à récupérer.
+    return: Objet Presence correspondant.
+    """
+    try:
+        return await service_get_presence_by_id(id_etu)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/db/insert-presence", response_model=Presence, tags=["Presence"])
 async def insert_presence(presence: Presence):
     """
     Insère une nouvelle présence dans la base de données.
@@ -157,7 +181,7 @@ async def insert_presence(presence: Presence):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
     
-@app.get("/db/count-day", response_model=dict)
+@app.get("/db/count-day", response_model=dict, tags=["Presence"])
 async def get_count_day():
     """
     Retourne le nombre de badges (présences) du jour.
@@ -168,7 +192,7 @@ async def get_count_day():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
     
-@app.get("/db/count-week", response_model=dict)
+@app.get("/db/count-week", response_model=dict, tags=["Presence"])
 async def get_count_week():
     """
     Retourne le nombre de badges (présences) de la semaine courante.
