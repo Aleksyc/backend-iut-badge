@@ -1,0 +1,21 @@
+{
+	"builds": [
+		{
+			"src": "api/app.py",
+			"use": "@vercel/python",
+			"config": {
+				"runtime": "python3.11",
+				"maxLambdaSize": "15mb"
+			}
+		}
+	],
+	"routes": [
+		{
+			"src": "/(.*)",
+			"dest": "api/app.py"
+		}
+	],
+	"env": {
+		"DB_URL": "@db_url"
+	}
+}
