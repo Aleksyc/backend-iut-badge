@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from psqlModel import Etudiant, EtudiantCreate, Presence, EtudPres
 from typing import Dict, Any
 from fastapi import Body
+import uvicorn
 
 app = FastAPI()
 
@@ -202,3 +203,6 @@ async def get_count_week():
         return {"count-week": await service_get_count_week()}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+if __name__ == "__main__":
+    uvicorn.run("app:app", host="0.0.0.0", port=8000)
