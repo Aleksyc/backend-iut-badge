@@ -1,8 +1,8 @@
-import dotenv
+from dotenv import load_dotenv
 import os
 import asyncpg
 
-dotenv.load_dotenv()
+load_dotenv()
 
 async def create_pool():
     return await asyncpg.create_pool(
