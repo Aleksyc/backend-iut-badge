@@ -8,7 +8,7 @@ class EtudiantCreate(BaseModel):
     anne_etu: str
     td_etu: (str|None) = None
     tp_etu: (str|None) = None
-    id_carte_etu: int
+    id_carte_etu: str
 
 class Etudiant(BaseModel):
     id_etu: int
@@ -17,11 +17,11 @@ class Etudiant(BaseModel):
     anne_etu: str
     td_etu: (str|None) = None
     tp_etu: (str|None) = None
-    id_carte_etu: int
+    id_carte_etu: str
 
 class Presence(BaseModel):
     id_pres: int
-    id_carte_etu: int
+    id_carte_etu: str
     datetime_pres: datetime
     type_pres: (str|None) = None
 
