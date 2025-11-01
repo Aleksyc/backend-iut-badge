@@ -162,7 +162,7 @@ async def service_get_presence_by_id(id_etu: int):
     """
     pool = await create_pool()
     async with pool.acquire() as connection:
-        row = await connection.fetch("SELECT id_pres, presence.id_carte_etu, datetime_pres, type_pres FROM presence INNER JOIN etudiant ON presence.id_carte_etu = etudiant.id_carte_etu WHERE etudiant.id_etu = $1;", id_etu)
+        row = await connection.fetch("SELECT id_pres, presence.id_carte_etu, datetime_pres FROM presence INNER JOIN etudiant ON presence.id_carte_etu = etudiant.id_carte_etu WHERE etudiant.id_etu = $1;", id_etu)
     await pool.close()
     return [Presence(**item) for item in row]
 
@@ -197,10 +197,9 @@ async def service_insert_presence(presence: Presence):
     pool = await create_pool()
     async with pool.acquire() as connection:
         await connection.execute(
-            "INSERT INTO presence (id_carte_etu, datetime_pres, type_pres) VALUES ($1, $2, $3);",
+            "INSERT INTO presence (id_carte_etu, datetime_pres) VALUES ($1, $2);",
             presence.id_carte_etu,
             presence.datetime_pres,
-            presence.type_pres,
         )
     await pool.close()
     return presence

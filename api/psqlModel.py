@@ -23,7 +23,6 @@ class Presence(BaseModel):
     id_pres: int
     id_carte_etu: str
     datetime_pres: datetime
-    type_pres: (str|None) = None
 
 class EtudPres(BaseModel):
     id_etu: int
