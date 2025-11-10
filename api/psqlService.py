@@ -22,7 +22,7 @@ async def service_get_etudiants_presences():
     """
     pool = await create_pool()
     async with pool.acquire() as connection:
-        query = f"SELECT e.id_etu,e.nom_etu,e.prenom_etu,e.anne_etu,e.td_etu,e.tp_etu, p.datetime_pres, CASE WHEN p.id_carte_etu IS NOT NULL THEN 'Présent' ELSE 'Absent' END AS statut_presence FROM etudiant e CROSS JOIN (SELECT jour FROM generate_series('2025-10-25'::date, to_char(CURRENT_DATE, 'YYYY-MM-DD')::date, interval '1 day') AS g(jour) WHERE EXTRACT(ISODOW FROM jour) NOT IN (6, 7)) AS d LEFT JOIN presence p ON e.id_carte_etu = p.id_carte_etu AND p.datetime_pres::date = d.jour ORDER BY d.jour;"
+        query = f"SELECT e.id_etu,e.nom_etu,e.prenom_etu,e.anne_etu,e.td_etu,e.tp_etu, COALESCE(p.datetime_pres::date, d.jour), CASE WHEN p.id_carte_etu IS NOT NULL THEN 'Présent' ELSE 'Absent' END AS statut_presence FROM etudiant e CROSS JOIN (SELECT jour FROM generate_series('2025-10-20'::date, to_char(CURRENT_DATE, 'YYYY-MM-DD')::date, interval '1 day') AS g(jour) WHERE EXTRACT(ISODOW FROM jour) NOT IN (6, 7)) AS d LEFT JOIN presence p ON e.id_carte_etu = p.id_carte_etu AND p.datetime_pres::date = d.jour ORDER BY d.jour DESC;"
         values = []
         result = await connection.fetch(query, *values)
     await pool.close()
