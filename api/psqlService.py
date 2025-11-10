@@ -15,27 +15,15 @@ async def service_get_all_etudiants():
     await pool.close()
     return [Etudiant(**item) for item in result]
 
-async def service_search_etudiants(params: dict):
+async def service_get_etudiants_presences():
     """
-    Recherche les étudiants selon des paramètres (dates, nom, groupe, etc).
-    param params: Dictionnaire des filtres de recherche.
-    return: Liste d'objets EtudPres correspondant aux critères.
+    Récupère les présences associées à chaque étudiant.
+    return: Liste d'objets EtudPres (étudiant + présence).
     """
     pool = await create_pool()
     async with pool.acquire() as connection:
-        if params and params["datetime_pres_start"] != "" and params["datetime_pres_end"] != "":
-            date_start = datetime.datetime.strptime(params["datetime_pres_start"], "%Y-%m-%d").date()
-            date_end = datetime.datetime.strptime(params["datetime_pres_end"], "%Y-%m-%d").date()
-            query = f"SELECT e.id_etu,e.nom_etu,e.prenom_etu,e.anne_etu,e.td_etu,e.tp_etu, p.datetime_pres, CASE WHEN p.id_carte_etu IS NOT NULL THEN 'Présent' ELSE 'Absent' END AS statut_presence FROM etudiant e CROSS JOIN (SELECT jour FROM generate_series('{date_start}'::date, '{date_end}'::date, interval '1 day') AS g(jour) WHERE EXTRACT(ISODOW FROM jour) NOT IN (6, 7)) AS d LEFT JOIN presence p ON e.id_carte_etu = p.id_carte_etu AND p.datetime_pres::date = d.jour"
-            values = []
-            i = 1
-            for key, value in params.items():
-                if key != "datetime_pres_start" and key != "datetime_pres_end" and value != "":
-                    if i == 1 : query += f" WHERE {key} = ${i}"
-                    else: query += f" AND {key} = ${i}"
-                    values.append(value)
-                    i += 1
-            query += " ORDER BY d.jour;"
+        query = f"SELECT e.id_etu,e.nom_etu,e.prenom_etu,e.anne_etu,e.td_etu,e.tp_etu, p.datetime_pres, CASE WHEN p.id_carte_etu IS NOT NULL THEN 'Présent' ELSE 'Absent' END AS statut_presence FROM etudiant e CROSS JOIN (SELECT jour FROM generate_series('2025-10-25'::date, to_char(CURRENT_DATE, 'YYYY-MM-DD')::date, interval '1 day') AS g(jour) WHERE EXTRACT(ISODOW FROM jour) NOT IN (6, 7)) AS d LEFT JOIN presence p ON e.id_carte_etu = p.id_carte_etu AND p.datetime_pres::date = d.jour ORDER BY d.jour;"
+        values = []
         result = await connection.fetch(query, *values)
     await pool.close()
     return [EtudPres(**item) for item in result]
@@ -105,17 +93,6 @@ async def service_get_count_etudiants_actifs():
         result = await connection.fetch("SELECT COUNT(DISTINCT id_carte_etu) AS nb_etudiants_actifs FROM presence WHERE datetime_pres::date = CURRENT_DATE;")
     await pool.close()
     return result[0]["nb_etudiants_actifs"]
-
-async def service_get_etudiants_presences():
-    """
-    Récupère les présences associées à chaque étudiant.
-    return: Liste d'objets EtudPres (étudiant + présence).
-    """
-    pool = await create_pool()
-    async with pool.acquire() as connection:
-        result = await connection.fetch("SELECT id_etu, nom_etu, prenom_etu, anne_etu, td_etu, tp_etu, datetime_pres FROM etudiant INNER JOIN presence ON etudiant.id_carte_etu = presence.id_carte_etu;")
-    await pool.close()
-    return [EtudPres(**item) for item in result]
 
 async def service_delete_etudiant(id_etu: int):
     """

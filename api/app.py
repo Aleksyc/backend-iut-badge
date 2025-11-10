@@ -100,15 +100,15 @@ async def get_etudiant_by_id(id_etu: int):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/db/search-etudiants", response_model=list[EtudPres], tags=["Etudiant"])
-async def search_etudiants(params: Dict[str, Any] | None = Body(...)):
+@app.get("/db/etudiants-presences", response_model=list[EtudPres], tags=["Etudiant"])
+async def search_etudiants():
     """
     Recherche des étudiants selon des paramètres (dates, nom, groupe, etc).
     param params: Dictionnaire des filtres de recherche.
     return: Liste d'objets EtudPres correspondant aux critères.
     """
     try:
-        return await service_search_etudiants(params)
+        return await service_get_etudiants_presences()
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -131,17 +131,6 @@ async def get_count_etudiants_actifs():
     """
     try:
         return {"count-etudiants-actifs": await service_get_count_etudiants_actifs()}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-    
-@app.get("/db/etudiants-presences", response_model=list[EtudPres], tags=["Etudiant"])
-async def get_etudiants_presences():
-    """
-    Récupère les présences associées à chaque étudiant.
-    return: Liste d'objets EtudPres (étudiant + présence).
-    """
-    try:
-        return await service_get_etudiants_presences()
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
