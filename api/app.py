@@ -147,12 +147,12 @@ async def get_all_presences():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/db/presences/{id_etu}", response_model=list[Presence] | None, tags=["Presence"])
+@app.get("/db/presences/{id_etu}", response_model=list[EtudPres] | None, tags=["Presence"])
 async def get_presence_by_id(id_etu: int):
     """
     Récupère une présence selon l'ID d'un étudiant.
     param id_etu: ID de l'étudiant à récupérer.
-    return: Objet Presence correspondant.
+    return: Objet EtudPres correspondant.
     """
     try:
         return await service_get_presence_by_id(id_etu)

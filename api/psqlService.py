@@ -22,7 +22,7 @@ async def service_get_etudiants_presences():
     """
     pool = await create_pool()
     async with pool.acquire() as connection:
-        query = f"SELECT e.id_etu,e.nom_etu,e.prenom_etu,e.anne_etu,e.td_etu,e.tp_etu, COALESCE(p.datetime_pres::date, d.jour) AS datetime_pres, CASE WHEN p.id_carte_etu IS NOT NULL THEN 'Présent' ELSE 'Absent' END AS statut_presence FROM etudiant e CROSS JOIN (SELECT jour FROM generate_series('2025-10-20'::date, to_char(CURRENT_DATE, 'YYYY-MM-DD')::date, interval '1 day') AS g(jour) WHERE EXTRACT(ISODOW FROM jour) NOT IN (6, 7)) AS d LEFT JOIN presence p ON e.id_carte_etu = p.id_carte_etu AND p.datetime_pres::date = d.jour ORDER BY d.jour DESC;"
+        query = "SELECT e.id_etu,e.nom_etu,e.prenom_etu,e.anne_etu,e.td_etu,e.tp_etu, CASE WHEN p.id_carte_etu IS NOT NULL THEN p.datetime_pres ELSE d.jour::timestamp END AS datetime_pres, CASE WHEN p.id_carte_etu IS NOT NULL THEN 'Présent' ELSE 'Absent' END AS statut_presence FROM etudiant e CROSS JOIN (SELECT jour FROM generate_series('2025-10-20'::date, to_char(CURRENT_DATE, 'YYYY-MM-DD')::date, interval '1 day') AS g(jour) WHERE EXTRACT(ISODOW FROM jour) NOT IN (6, 7)) AS d LEFT JOIN presence p ON e.id_carte_etu = p.id_carte_etu AND p.datetime_pres::date = d.jour ORDER BY d.jour DESC;"
         values = []
         result = await connection.fetch(query, *values)
     await pool.close()
@@ -139,9 +139,10 @@ async def service_get_presence_by_id(id_etu: int):
     """
     pool = await create_pool()
     async with pool.acquire() as connection:
-        row = await connection.fetch("SELECT id_pres, presence.id_carte_etu, datetime_pres FROM presence INNER JOIN etudiant ON presence.id_carte_etu = etudiant.id_carte_etu WHERE etudiant.id_etu = $1;", id_etu)
+        query = "SELECT e.id_etu,e.nom_etu,e.prenom_etu,e.anne_etu,e.td_etu,e.tp_etu, CASE WHEN p.id_carte_etu IS NOT NULL THEN p.datetime_pres ELSE d.jour::timestamp END AS datetime_pres, CASE WHEN p.id_carte_etu IS NOT NULL THEN 'Présent' ELSE 'Absent' END AS statut_presence FROM etudiant e CROSS JOIN (SELECT jour FROM generate_series('2025-10-20'::date, to_char(CURRENT_DATE, 'YYYY-MM-DD')::date, interval '1 day') AS g(jour) WHERE EXTRACT(ISODOW FROM jour) NOT IN (6, 7)) AS d LEFT JOIN presence p ON e.id_carte_etu = p.id_carte_etu AND p.datetime_pres::date = d.jour WHERE e.id_etu = $1 ORDER BY d.jour DESC;"
+        row = await connection.fetch(query, id_etu)
     await pool.close()
-    return [Presence(**item) for item in row]
+    return [EtudPres(**item) for item in row]
 
 async def service_get_count_week():
     """
