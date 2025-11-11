@@ -37,8 +37,8 @@ async def service_insert_etudiant(etudiant: EtudiantCreate):
     pool = await create_pool()
     async with pool.acquire() as connection:
         row = await connection.fetchrow(
-            "INSERT INTO etudiant (id_etu,nom_etu, prenom_etu, anne_etu, td_etu, tp_etu, id_carte_etu) "
-            "VALUES ((SELECT MAX(id_etu)+1 FROM etudiant), $1, $2, $3, $4, $5, $6) RETURNING id_etu, nom_etu, prenom_etu, anne_etu, td_etu, tp_etu, id_carte_etu;",
+            "INSERT INTO etudiant (nom_etu, prenom_etu, anne_etu, td_etu, tp_etu, id_carte_etu) "
+            "VALUES ($1, $2, $3, $4, $5, $6) RETURNING id_etu, nom_etu, prenom_etu, anne_etu, td_etu, tp_etu, id_carte_etu;",
             etudiant.nom_etu,
             etudiant.prenom_etu,
             etudiant.anne_etu,
