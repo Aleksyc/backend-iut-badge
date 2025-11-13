@@ -174,10 +174,10 @@ async def service_insert_presence(presence: Presence):
     """
     pool = await create_pool()
     async with pool.acquire() as connection:
-        await connection.execute(
-            "INSERT INTO presence (id_carte_etu, datetime_pres) VALUES ($1, $2);",
+        row = await connection.fetchrow(
+            "INSERT INTO presence (id_carte_etu, datetime_pres) VALUES ($1, $2) RETURNING *;",
             presence.id_carte_etu,
             presence.datetime_pres,
         )
     await pool.close()
-    return presence
+    return Presence(**row)
