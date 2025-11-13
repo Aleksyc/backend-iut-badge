@@ -1,7 +1,7 @@
 from psqlService import *
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from psqlModel import Etudiant, EtudiantCreate, Presence, EtudPres
+from psqlModel import Etudiant, EtudiantCreate, Presence, EtudPres, PresenceCreate
 from typing import Dict, Any
 from fastapi import Body
 import uvicorn
@@ -160,7 +160,7 @@ async def get_presence_by_id(id_etu: int):
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/db/insert-presence", response_model=Presence, tags=["Presence"])
-async def insert_presence(presence: Presence):
+async def insert_presence(presence: PresenceCreate):
     """
     Insère une nouvelle présence dans la base de données.
     param presence: Données de la présence à insérer (Presence).
