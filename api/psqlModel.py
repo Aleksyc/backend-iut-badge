@@ -10,6 +10,10 @@ class EtudiantCreate(BaseModel):
     tp_etu: (str|None) = None
     id_carte_etu: str
 
+class PresenceCreate(BaseModel):
+    id_carte_etu: str
+    datetime_pres: datetime
+
 class Etudiant(BaseModel):
     id_etu: int
     nom_etu: str
